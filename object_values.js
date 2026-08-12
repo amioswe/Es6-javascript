@@ -1,14 +1,28 @@
-const profile={
-    name:'AMIODAS',
+// const profile={
+//     name:'AMIODAS',
+//     age:23,
+//     adreess:'kanaipur'
+// }
+// const showResult=Object.keys(profile);
+// console.log(showResult);
+
+// const showResult2=Object.values(profile);
+// console.log(showResult2);
+
+
+// const entries=Object.entries(profile);
+// console.log(entries);
+
+
+const birthcetificate={
+    name:'amio',
     age:23,
-    adreess:'kanaipur'
+    nationality:'bangladeshi'
 }
-const showResult=Object.keys(profile);
-console.log(showResult);
-
-const showResult2=Object.values(profile);
-console.log(showResult2);
+Object.freeze(birthcetificate);
 
 
-const entries=Object.entries(profile);
-console.log(entries);
+delete birthcetificate.name;
+birthcetificate.new='wejw';
+
+console.log(birthcetificate);
