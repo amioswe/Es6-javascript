@@ -14,3 +14,9 @@ return showResult;
 
 }
 console.log(finalresult('Mikhaile',343));
+
+console.log(finalresult('AMIO DAS',365));
+
+console.log(finalresult('dURJOY',3455));
+
+console.log(finalresult('PROTIK',34399));
