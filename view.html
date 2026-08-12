@@ -1,0 +1,1178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Architecture Document - Island Rental System</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --secondary: #0f172a;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --border: #e2e8f0;
+            --border-dark: #cbd5e1;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --code-bg: #0f172a;
+            --code-text: #f8fafc;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+            background-color: var(--surface-alt);
+            line-height: 1.6;
+            display: flex;
+        }
+
+        nav.sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 1rem;
+            flex-shrink: 0;
+        }
+
+        nav.sidebar h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        nav.sidebar h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        nav.sidebar ul {
+            list-style: none;
+        }
+
+        nav.sidebar li {
+            margin-bottom: 0.25rem;
+        }
+
+        nav.sidebar a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: block;
+            padding: 0.35rem 0.6rem;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        nav.sidebar a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        main.content {
+            flex: 1;
+            max-width: 1000px;
+            padding: 2.5rem 3rem;
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin: 0 auto;
+        }
+
+        .doc-header {
+            border-bottom: 3px double var(--border-dark);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .doc-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--secondary);
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        .doc-subtitle {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+        .meta-table td {
+            padding: 0.4rem 0.8rem;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            border-left: none;
+            border-top: none;
+        }
+
+        .meta-table tr td:last-child {
+            border-right: none;
+        }
+
+        .meta-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .meta-table td.label {
+            font-weight: 600;
+            background-color: var(--surface-alt);
+            width: 20%;
+            color: var(--secondary);
+        }
+
+        section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 2rem;
+        }
+
+        h1.section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.4rem;
+            margin-bottom: 1.2rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2.subsection-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        h3.subsubsection-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-top: 1.2rem;
+            margin-bottom: 0.6rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            text-align: justify;
+        }
+
+        ul,
+        ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+        }
+
+        .callout {
+            padding: 1rem 1.25rem;
+            border-left: 4px solid var(--primary);
+            background-color: var(--primary-light);
+            border-radius: 0 6px 6px 0;
+            margin: 1.25rem 0;
+            font-size: 0.95rem;
+        }
+
+        .callout.important {
+            border-left-color: var(--accent-amber);
+            background-color: #fffbeb;
+        }
+
+        .callout.invariant {
+            border-left-color: #8b5cf6;
+            background-color: #f5f3ff;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 1.25rem 0;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+        table.data-table th,
+        table.data-table td {
+            padding: 0.6rem 0.8rem;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            border-left: none;
+            border-top: none;
+            text-align: left;
+        }
+
+        table.data-table tr th:last-child,
+        table.data-table tr td:last-child {
+            border-right: none;
+        }
+
+        table.data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        table.data-table th {
+            background-color: var(--surface-alt);
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        table.data-table tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 1.25rem 0;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            background-color: var(--surface-alt);
+            color: var(--primary-dark);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.875em;
+            border: 1px solid var(--border);
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+        }
+
+        .diagram-container {
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .diagram-caption {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+
+        .badge {
+            display: inline;
+            padding: 0;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-blue { color: #2563eb; }
+        .badge-green { color: #16a34a; }
+        .badge-amber { color: #d97706; }
+        .badge-red { color: #dc2626; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 15mm 12mm 15mm 12mm; }
+            *, *::before, *::after { background: transparent !important; color: #000000 !important; box-shadow: none !important; text-shadow: none !important; }
+            body { background: #ffffff !important; color: #000000 !important; font-size: 10pt; line-height: 1.45; display: block !important; }
+            nav.sidebar { display: none !important; }
+            main.content { max-width: 100% !important; width: 100% !important; padding: 0 1px !important; margin: 0 !important; box-shadow: none !important; border: none !important; background: #ffffff !important; box-sizing: border-box !important; }
+            .doc-header { border-bottom: 2px solid #000000 !important; padding-bottom: 1rem; margin-bottom: 1.5rem; text-align: center !important; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 25cm; }
+            .doc-title { color: #000000 !important; font-size: 1.8rem; }
+            .doc-subtitle { color: #000000 !important; font-size: 1.1rem; }
+            section { margin-bottom: 2rem; page-break-before: always; break-before: page; }
+            section#section-1 { page-break-before: always; break-before: page; }
+            h1.section-title { color: #000000 !important; border-bottom: 2px solid #000000 !important; padding-bottom: 0.2rem; margin-top: 0; margin-bottom: 1rem; font-size: 1.4rem; page-break-after: avoid; break-after: avoid; }
+            h2.subsection-title { color: #000000 !important; margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.15rem; page-break-after: avoid; break-after: avoid; }
+            p, li { color: #000000 !important; }
+            .meta-table, table.data-table { width: 100% !important; table-layout: fixed !important; border-collapse: separate !important; border-spacing: 0 !important; border: 1px solid #000000 !important; border-radius: 0 !important; margin: 1rem 0 !important; box-sizing: border-box !important; }
+            .doc-header .meta-table { width: 80% !important; margin-top: 1.25rem !important; }
+            .meta-table td, table.data-table th, table.data-table td { border-right: 1px solid #000000 !important; border-bottom: 1px solid #000000 !important; border-left: none !important; border-top: none !important; padding: 0.45rem 0.55rem !important; color: #000000 !important; font-size: 8.5pt !important; vertical-align: middle !important; word-wrap: break-word !important; overflow-wrap: break-word !important; }
+            .meta-table td.label, table.data-table th { background-color: #f0f0f0 !important; color: #000000 !important; font-weight: bold !important; }
+            table.data-table tr:nth-child(even) { background-color: #ffffff !important; }
+            tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+            .callout { border: 1px solid #000000 !important; border-left: 4px solid #000000 !important; background-color: #f9f9f9 !important; color: #000000 !important; padding: 0.8rem 1rem !important; margin: 1rem 0 !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+            .badge { color: #000000 !important; font-weight: bold !important; }
+            pre { background: #ffffff !important; color: #000000 !important; border: 1px solid #000000 !important; padding: 0.8rem !important; margin: 1rem 0 !important; font-size: 8pt !important; white-space: pre-wrap !important; word-break: break-word !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+            code { background: #f0f0f0 !important; color: #000000 !important; border: 1px solid #999999 !important; padding: 0.1rem 0.3rem !important; font-size: 8.5pt !important; }
+            .diagram-container { background: #ffffff !important; border: 1px solid #000000 !important; padding: 1rem !important; margin: 1rem 0 !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+            .diagram-container svg rect, .diagram-container svg circle, .diagram-container svg ellipse { fill: #ffffff !important; stroke: #000000 !important; stroke-width: 1.5px !important; }
+            .diagram-container svg line, .diagram-container svg path { stroke: #000000 !important; stroke-width: 1.5px !important; }
+            .diagram-container svg text { fill: #000000 !important; font-weight: bold !important; }
+            a { color: #000000 !important; text-decoration: underline !important; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <h2>Island Rental SAD</h2>
+        <h3>Document Sections</h3>
+        <ul>
+            <li><a href="#section-1">1. Introduction</a></li>
+            <li><a href="#section-2">2. Architectural Representation</a></li>
+            <li><a href="#section-3">3. Goals & Constraints</a></li>
+            <li><a href="#section-4">4. Use-Case View</a></li>
+            <li><a href="#section-5">5. Logical View</a></li>
+            <li><a href="#section-6">6. Process View</a></li>
+            <li><a href="#section-7">7. Deployment View</a></li>
+            <li><a href="#section-8">8. Implementation View</a></li>
+            <li><a href="#section-9">9. Data View</a></li>
+            <li><a href="#section-10">10. Size & Performance</a></li>
+            <li><a href="#section-11">11. Quality</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+
+        <header class="doc-header">
+            <h1 class="doc-title">Software Architecture Document</h1>
+            <div class="doc-subtitle">Island Rental System — Full-Stack Island Tourism &amp; Booking Platform</div>
+            <table class="meta-table">
+                <tr>
+                    <td class="label">System Name</td>
+                    <td>Island Rental System</td>
+                    <td class="label">Document Version</td>
+                    <td>1.0.0</td>
+                </tr>
+                <tr>
+                    <td class="label" colspan="2">Date</td>
+                    <td colspan="2">August 9, 2026</td>
+                </tr>
+            </table>
+        </header>
+
+        <!-- SECTION 1 -->
+        <section id="section-1">
+            <h1 class="section-title">1. Introduction</h1>
+
+            <h2 class="subsection-title">1.1 Purpose</h2>
+            <p>
+                This Software Architecture Document (SAD) provides a complete architectural overview of the
+                <strong>Island Rental System</strong>, a full-stack booking platform for island destinations, hotels,
+                and tours. It records the significant architectural decisions, layering strategy, and role-based
+                access model that govern the system, and is intended for developers, reviewers, and maintainers who
+                need to understand how the platform is structured end-to-end — from the React client through the
+                Express API to the MariaDB persistence layer.
+            </p>
+
+            <h2 class="subsection-title">1.2 Scope</h2>
+            <p>
+                The scope of the Island Rental System covers a React 18 + TypeScript single-page client application,
+                a RESTful Express.js API server, and a relational MariaDB/MySQL database (schema
+                <code>islan_tour</code>) served locally through XAMPP. The system allows public visitors to browse
+                islands, hotels, and tours; allows registered users to create and manage bookings and payments; and
+                allows administrators to manage the entire catalog, bookings, users, and payment records through a
+                dedicated admin console. Native mobile clients, third-party payment gateway integration, and
+                multi-tenant deployment are explicitly out of scope for this architecture.
+            </p>
+
+            <h2 class="subsection-title">1.3 Definitions, Acronyms, and Abbreviations</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Term / Acronym</th>
+                        <th style="width: 75%;">Definition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>SAD</strong></td><td>Software Architecture Document</td></tr>
+                    <tr><td><strong>RUP</strong></td><td>Rational Unified Process (framework defining architectural view models)</td></tr>
+                    <tr><td><strong>RBAC</strong></td><td>Role-Based Access Control (restricting permissions based on user role)</td></tr>
+                    <tr><td><strong>JWT</strong></td><td>JSON Web Token (HMAC-SHA256 authenticated session token)</td></tr>
+                    <tr><td><strong>SPA</strong></td><td>Single Page Application (React browser application with client-side routing)</td></tr>
+                    <tr><td><strong>REST</strong></td><td>Representational State Transfer, the API architectural style used between client and server</td></tr>
+                    <tr><td><strong>MVC</strong></td><td>Model-View-Controller, the backend organizational pattern (routes / controllers / models)</td></tr>
+                    <tr><td><strong>ORM-less pool</strong></td><td>Direct SQL access via the <code>mysql2</code> connection pool, without an ORM abstraction layer</td></tr>
+                    <tr><td><strong>CRUD</strong></td><td>Create, Read, Update, Delete — the basic data operations exposed by the admin API</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="subsection-title">1.4 References</h2>
+            <ul>
+                <li>Kruchten, P. (1995). <em>Architectural Blueprints — The "4+1" View Model of Software Architecture</em>. IEEE Software, 12(6), 42-50.</li>
+                <li>Island Rental System — Project Overview and Technology Stack Notes</li>
+                <li>Island Rental System — Database Schema Reference (<code>islan_tour</code>)</li>
+                <li>Island Rental System — API Route &amp; RBAC Reference</li>
+            </ul>
+
+            <h2 class="subsection-title">1.5 Overview</h2>
+            <p>The remainder of this document follows the RUP 4+1 View Model format:</p>
+            <ul>
+                <li><strong>Section 2 — Architectural Representation:</strong> Explains the 4+1 view structure used to document the system.</li>
+                <li><strong>Section 3 — Architectural Goals and Constraints:</strong> Defines technical goals and system constraints.</li>
+                <li><strong>Section 4 — Use-Case View:</strong> Describes actors, primary use cases, and the RBAC matrix.</li>
+                <li><strong>Section 5 — Logical View:</strong> Explains system layering, pages, services, controllers, and middleware.</li>
+                <li><strong>Section 6 — Process View:</strong> Details the authentication, booking, and admin-booking runtime flows.</li>
+                <li><strong>Section 7 — Deployment View:</strong> Maps the physical/network topology across client, API, and database.</li>
+                <li><strong>Section 8 — Implementation View:</strong> Presents source directory organization.</li>
+                <li><strong>Section 9 — Data View:</strong> Details the relational schema and data integrity rules.</li>
+                <li><strong>Section 10 — Size and Performance:</strong> Quantifies target latencies and resource footprints.</li>
+                <li><strong>Section 11 — Quality:</strong> Covers security, maintainability, and reliability attributes.</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section id="section-2">
+            <h1 class="section-title">2. Architectural Representation</h1>
+            <p>
+                The architecture of the Island Rental System is documented using the RUP <strong>4+1 View
+                Model</strong>, giving each stakeholder group (developers, reviewers, operators) a focused
+                perspective on the same underlying design.
+            </p>
+
+            <div class="diagram-container">
+                <svg width="640" height="300" viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="320" cy="150" rx="70" ry="42" fill="#0f172a" />
+                    <text x="320" y="146" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">Logical View</text>
+                    <text x="320" y="162" text-anchor="middle" font-size="10" fill="#cbd5e1">(+ Use-Case View)</text>
+
+                    <ellipse cx="130" cy="60" rx="90" ry="30" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
+                    <text x="130" y="64" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">Use-Case View</text>
+
+                    <ellipse cx="510" cy="60" rx="90" ry="30" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5" />
+                    <text x="510" y="64" text-anchor="middle" font-size="11" font-weight="600" fill="#15803d">Process View</text>
+
+                    <ellipse cx="130" cy="240" rx="90" ry="30" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" />
+                    <text x="130" y="244" text-anchor="middle" font-size="11" font-weight="600" fill="#92400e">Deployment View</text>
+
+                    <ellipse cx="510" cy="240" rx="90" ry="30" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5" />
+                    <text x="510" y="244" text-anchor="middle" font-size="11" font-weight="600" fill="#991b1b">Implementation View</text>
+
+                    <line x1="190" y1="200" x2="240" y2="180" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4" />
+                    <line x1="410" y1="180" x2="460" y2="200" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4" />
+                    <line x1="190" y1="100" x2="240" y2="120" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4" />
+                    <line x1="410" y1="120" x2="460" y2="100" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4" />
+                </svg>
+                <div class="diagram-caption">Figure 2.1 — RUP 4+1 View Model applied to the Island Rental System</div>
+            </div>
+
+            <ul>
+                <li><strong>Use-Case View:</strong> Requirements and workflows for Guest, Registered User, and Admin actors.</li>
+                <li><strong>Logical View:</strong> React SPA presentation layer, the Axios API service layer, and the Express MVC backend layer.</li>
+                <li><strong>Process View:</strong> Runtime request/response flows for authentication, booking, and admin operations.</li>
+                <li><strong>Deployment View:</strong> Physical topology across the client (:3000), API server (:5001), and MariaDB (:3306).</li>
+                <li><strong>Implementation View:</strong> Source directory organization for the client and server codebases.</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section id="section-3">
+            <h1 class="section-title">3. Architectural Goals and Constraints</h1>
+
+            <h2 class="subsection-title">3.1 Technical Goals &amp; Objectives</h2>
+            <ol>
+                <li><strong>Clean Client/Server Decoupling:</strong> The React SPA communicates with the backend exclusively over a versioned JSON REST API, never accessing the database directly.</li>
+                <li><strong>Role-Based Access Enforcement:</strong> System features and API routes are gated by user role (public, protected user, admin) at the middleware level.</li>
+                <li><strong>Booking Lifecycle Integrity:</strong> Every booking is created with a server-computed total price and a controlled status lifecycle, preventing client-side price tampering.</li>
+                <li><strong>Session Security:</strong> Authentication uses signed JWTs so the server remains stateless between requests.</li>
+                <li><strong>Type Safety:</strong> Shared TypeScript types (<code>types/index.ts</code>) keep the client's data shapes aligned with the API contract.</li>
+            </ol>
+
+            <h2 class="subsection-title">3.2 System Constraints</h2>
+            <ul>
+                <li><strong>Fixed Technology Stack:</strong> React 18 + TypeScript on the client, Express.js on Node.js for the API, and MariaDB/MySQL for persistence.</li>
+                <li><strong>Local Development Topology:</strong> The client runs on port <code>3000</code>, the API server on port <code>5001</code>, and MariaDB 10.4.32 on port <code>3306</code> via XAMPP.</li>
+                <li><strong>Stateless Authentication:</strong> Sessions are not stored server-side; the JWT (HS256) issued at login is the sole proof of identity, held client-side in <code>localStorage</code>.</li>
+                <li><strong>Styling Constraint:</strong> All UI styling is implemented with Tailwind CSS utility classes; no separate CSS-in-JS or SCSS pipeline is used.</li>
+            </ul>
+
+            <h2 class="subsection-title">3.3 Design Rationale</h2>
+            <div class="callout">
+                <strong>Architectural Rationale:</strong> Separating the system into three independently deployable
+                layers (React client, Express API, MariaDB store) connected only through well-defined HTTP/JSON and
+                SQL contracts keeps each layer independently testable and replaceable. Using a raw
+                <code>mysql2</code> connection pool instead of an ORM keeps SQL explicit and predictable while
+                <code>express-validator</code> centralizes input validation at the route boundary.
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section id="section-4">
+            <h1 class="section-title">4. Use-Case View</h1>
+
+            <h2 class="subsection-title">4.1 Primary Use-Case Realizations</h2>
+            <p>
+                The Island Rental System serves three distinct actors: <strong>Guest</strong> (unauthenticated
+                visitor), <strong>Registered User</strong>, and <strong>Admin</strong>.
+            </p>
+
+            <div class="diagram-container">
+                <svg width="680" height="380" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
+<g>
+<circle cx="35" cy="20" r="11" fill="#3b82f6"/>
+<line x1="35" y1="31" x2="35" y2="54" stroke="#3b82f6" stroke-width="2.2"/>
+<line x1="21" y1="39" x2="49" y2="39" stroke="#3b82f6" stroke-width="2.2"/>
+<line x1="35" y1="54" x2="21" y2="70" stroke="#3b82f6" stroke-width="2.2"/>
+<line x1="35" y1="54" x2="49" y2="70" stroke="#3b82f6" stroke-width="2.2"/>
+<text x="35" y="84" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Guest</text>
+</g>
+<g>
+<circle cx="35" cy="145" r="11" fill="#10b981"/>
+<line x1="35" y1="156" x2="35" y2="179" stroke="#10b981" stroke-width="2.2"/>
+<line x1="21" y1="164" x2="49" y2="164" stroke="#10b981" stroke-width="2.2"/>
+<line x1="35" y1="179" x2="21" y2="195" stroke="#10b981" stroke-width="2.2"/>
+<line x1="35" y1="179" x2="49" y2="195" stroke="#10b981" stroke-width="2.2"/>
+<text x="35" y="209" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Reg. User</text>
+</g>
+<g>
+<circle cx="35" cy="270" r="11" fill="#ef4444"/>
+<line x1="35" y1="281" x2="35" y2="304" stroke="#ef4444" stroke-width="2.2"/>
+<line x1="21" y1="289" x2="49" y2="289" stroke="#ef4444" stroke-width="2.2"/>
+<line x1="35" y1="304" x2="21" y2="320" stroke="#ef4444" stroke-width="2.2"/>
+<line x1="35" y1="304" x2="49" y2="320" stroke="#ef4444" stroke-width="2.2"/>
+<text x="35" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Admin</text>
+</g>
+<rect x="110" y="10" width="540" height="360" rx="10" fill="#fafafa" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="380" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">Island Rental System</text>
+<ellipse cx="230" cy="65" rx="88" ry="22" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="230" y="63.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1e293b">Browse Islands /</text>
+<text x="230" y="75.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1e293b">Hotels / Tours</text>
+
+<ellipse cx="230" cy="120" rx="88" ry="22" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="230" y="124.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1e40af">Register / Login</text>
+
+<ellipse cx="230" cy="175" rx="88" ry="22" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+<text x="230" y="179.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#15803d">Create Booking</text>
+
+<ellipse cx="230" cy="230" rx="88" ry="22" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+<text x="230" y="234.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#15803d">Make Payment</text>
+
+<ellipse cx="230" cy="285" rx="88" ry="22" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+<text x="230" y="289.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#15803d">Submit Review</text>
+
+<ellipse cx="230" cy="340" rx="88" ry="22" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+<text x="230" y="344.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#15803d">View Dashboard</text>
+
+<ellipse cx="480" cy="65" rx="105" ry="22" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="480" y="63.0" text-anchor="middle" font-size="9.5" font-weight="600" fill="#991b1b">Manage Catalog</text>
+<text x="480" y="75.0" text-anchor="middle" font-size="9.5" font-weight="600" fill="#991b1b">(Islands/Hotels/Tours/Rooms)</text>
+
+<ellipse cx="480" cy="130" rx="105" ry="22" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="480" y="134.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#991b1b">Manage Bookings</text>
+
+<ellipse cx="480" cy="195" rx="105" ry="22" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="480" y="199.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#991b1b">Manage Users</text>
+
+<ellipse cx="480" cy="260" rx="105" ry="22" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="480" y="264.0" text-anchor="middle" font-size="10.5" font-weight="600" fill="#991b1b">View Payments</text>
+
+<ellipse cx="480" cy="325" rx="105" ry="22" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="480" y="323.0" text-anchor="middle" font-size="9.5" font-weight="600" fill="#991b1b">View Dashboard</text>
+<text x="480" y="335.0" text-anchor="middle" font-size="9.5" font-weight="600" fill="#991b1b">Analytics</text>
+
+<line x1="60" y1="35" x2="142" y2="65" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="35" x2="142" y2="120" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="160" x2="142" y2="120" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="160" x2="142" y2="175" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="160" x2="142" y2="230" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="160" x2="142" y2="285" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="160" x2="142" y2="340" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="285" x2="375" y2="65" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="285" x2="375" y2="130" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="285" x2="375" y2="195" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="285" x2="375" y2="260" stroke="#94a3b8" stroke-width="1.3"/>
+<line x1="60" y1="285" x2="375" y2="325" stroke="#94a3b8" stroke-width="1.3"/>
+</svg>
+                <div class="diagram-caption">Figure 4.1 &#8212; UML Use-Case Diagram (System Boundary Notation)</div>
+            </div>
+
+            <h2 class="subsection-title">4.2 Role-Based Access Control (RBAC) Matrix</h2>
+            <p>Routes are grouped into three tiers, each guarded by the <code>protect</code> and
+                <code>authorize('admin')</code> middleware:</p>
+
+            <h3 class="subsubsection-title">Public Routes</h3>
+            <table class="data-table">
+                <thead><tr><th style="width:70%;">Route</th><th style="width:30%;">Access</th></tr></thead>
+                <tbody>
+                    <tr><td><code>/</code>, <code>/islands</code>, <code>/islands/:id</code>, <code>/hotels</code>, <code>/tours</code></td><td><span class="badge badge-green">public</span></td></tr>
+                    <tr><td><code>/login</code>, <code>/register</code></td><td><span class="badge badge-green">public</span></td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsubsection-title">Protected Routes (any authenticated user)</h3>
+            <table class="data-table">
+                <thead><tr><th style="width:70%;">Route</th><th style="width:30%;">Access</th></tr></thead>
+                <tbody>
+                    <tr><td><code>/dashboard</code>, <code>/booking/:type/:id</code></td><td><span class="badge badge-blue">protect</span></td></tr>
+                    <tr><td><code>GET/POST /api/bookings</code></td><td><span class="badge badge-blue">protect</span></td></tr>
+                    <tr><td><code>PUT /api/bookings/:id/status</code></td><td><span class="badge badge-blue">protect</span></td></tr>
+                    <tr><td><code>GET /api/auth/me</code></td><td><span class="badge badge-blue">protect</span></td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsubsection-title">Admin-Only Routes</h3>
+            <table class="data-table">
+                <thead><tr><th style="width:70%;">Route</th><th style="width:30%;">Access</th></tr></thead>
+                <tbody>
+                    <tr><td><code>/admin/*</code></td><td><span class="badge badge-red">admin</span></td></tr>
+                    <tr><td><code>GET /api/bookings/admin/all</code></td><td><span class="badge badge-red">admin</span></td></tr>
+                    <tr><td><code>POST /api/bookings/admin/create</code></td><td><span class="badge badge-red">admin</span></td></tr>
+                    <tr><td><code>GET /api/admin/dashboard</code>, <code>/api/admin/users/*</code></td><td><span class="badge badge-red">admin</span></td></tr>
+                    <tr><td><code>POST/PUT/DELETE</code> islands, hotels, tours, rooms</td><td><span class="badge badge-red">admin</span></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section id="section-5">
+            <h1 class="section-title">5. Logical View</h1>
+
+            <h2 class="subsection-title">5.1 Overview — Three-Tier Layering</h2>
+            <p>The system follows a strict three-tier architecture with a clear boundary between client, API, and database.</p>
+
+            <div class="diagram-container">
+                <svg width="720" height="610" viewBox="0 0 720 610" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+<path d="M0,0 L8,4 L0,8 Z" fill="#64748b"/>
+</marker>
+</defs>
+<rect x="40" y="20" width="640" height="160" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<rect x="40" y="20" width="640" height="34" rx="10" fill="#2563eb"/>
+<rect x="40" y="36" width="640" height="18" fill="#2563eb"/>
+<text x="60" y="43" font-size="13" font-weight="700" fill="#ffffff">1 &#183; CLIENT LAYER &#8212; React 18 + TypeScript &#183; Port 3000</text>
+<rect x="52" y="68" width="138" height="32" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.2"/>
+<text x="121.0" y="88.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">Pages &amp; Routing</text>
+<rect x="202" y="68" width="138" height="32" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.2"/>
+<text x="271.0" y="88.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">Components &amp; Guards</text>
+<rect x="352" y="68" width="138" height="32" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.2"/>
+<text x="421.0" y="88.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">AuthContext</text>
+<rect x="502" y="68" width="138" height="32" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.2"/>
+<text x="571.0" y="88.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">Axios + Interceptors</text>
+<rect x="52" y="112" width="138" height="32" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2"/>
+<text x="121.0" y="132.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#475569">react-hook-form</text>
+<rect x="202" y="112" width="138" height="32" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2"/>
+<text x="271.0" y="132.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#475569">react-hot-toast</text>
+<rect x="352" y="112" width="138" height="32" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2"/>
+<text x="421.0" y="132.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#475569">lucide-react</text>
+<rect x="502" y="112" width="138" height="32" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2"/>
+<text x="571.0" y="132.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#475569">tailwindcss</text>
+<line x1="360" y1="180" x2="360" y2="197" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="205" y="181.5" width="310" height="20" fill="#ffffff" stroke="#2563eb" stroke-width="1" rx="4"/>
+<text x="360" y="196.5" text-anchor="middle" font-size="10" font-weight="600" fill="#2563eb">HTTP &#183; REST / JSON &#183; Bearer JWT</text>
+<rect x="40" y="205" width="640" height="190" rx="10" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+<rect x="40" y="205" width="640" height="34" rx="10" fill="#0f172a"/>
+<rect x="40" y="221" width="640" height="18" fill="#0f172a"/>
+<text x="60" y="228" font-size="13" font-weight="700" fill="#ffffff">2 &#183; API LAYER &#8212; Express.js (MVC Pattern) &#183; Port 5001</text>
+<rect x="52" y="253" width="138" height="32" rx="6" fill="#ffffff" stroke="#0f172a" stroke-width="1.2"/>
+<text x="121.0" y="273.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">Routes (8 domains)</text>
+<rect x="202" y="253" width="138" height="32" rx="6" fill="#ffffff" stroke="#0f172a" stroke-width="1.2"/>
+<text x="271.0" y="273.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">Controllers</text>
+<rect x="352" y="253" width="138" height="32" rx="6" fill="#ffffff" stroke="#0f172a" stroke-width="1.2"/>
+<text x="421.0" y="273.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">protect / authorize</text>
+<rect x="502" y="253" width="138" height="32" rx="6" fill="#ffffff" stroke="#0f172a" stroke-width="1.2"/>
+<text x="571.0" y="273.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">express-validator</text>
+<rect x="52" y="297" width="138" height="32" rx="6" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2"/>
+<text x="121.0" y="317.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#475569">cors</text>
+<rect x="202" y="297" width="138" height="32" rx="6" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2"/>
+<text x="271.0" y="317.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#475569">helmet</text>
+<rect x="352" y="297" width="138" height="32" rx="6" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2"/>
+<text x="421.0" y="317.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#475569">morgan</text>
+<rect x="502" y="297" width="138" height="32" rx="6" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2"/>
+<text x="571.0" y="317.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#475569">mysql2 Pool</text>
+<line x1="360" y1="395" x2="360" y2="412" stroke="#15803d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="205" y="396.5" width="310" height="20" fill="#ffffff" stroke="#15803d" stroke-width="1" rx="4"/>
+<text x="360" y="411.5" text-anchor="middle" font-size="10" font-weight="600" fill="#15803d">SQL &#183; Parameterized Queries</text>
+<rect x="40" y="420" width="640" height="150" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+<rect x="40" y="420" width="640" height="34" rx="10" fill="#15803d"/>
+<rect x="40" y="436" width="640" height="18" fill="#15803d"/>
+<text x="60" y="443" font-size="12.5" font-weight="700" fill="#ffffff">3 &#183; DATABASE LAYER &#8212; MariaDB 10.4.32 (XAMPP) &#183; Port 3306 &#183; schema: islan_tour</text>
+<rect x="52" y="468" width="138" height="32" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="121.0" y="488.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">users</text>
+<rect x="202" y="468" width="138" height="32" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="271.0" y="488.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">islands</text>
+<rect x="352" y="468" width="138" height="32" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="421.0" y="488.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">hotels</text>
+<rect x="502" y="468" width="138" height="32" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="571.0" y="488.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">rooms</text>
+<rect x="52" y="512" width="138" height="32" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="121.0" y="532.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">tours</text>
+<rect x="202" y="512" width="138" height="32" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="271.0" y="532.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">bookings</text>
+<rect x="352" y="512" width="138" height="32" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="421.0" y="532.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">payments</text>
+<rect x="502" y="512" width="138" height="32" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+<text x="571.0" y="532.0" text-anchor="middle" font-size="10.3" font-weight="600" fill="#1e293b">reviews</text>
+</svg>
+                <div class="diagram-caption">Figure 5.1 &#8212; System Architecture at a Glance (Layered View with Modules)</div>
+            </div>
+
+            <h2 class="subsection-title">5.2 Frontend Layer</h2>
+            <p><strong>Pages &amp; Routes</strong> are grouped by access tier:</p>
+            <ul>
+                <li><strong>Public:</strong> Home, Islands, IslandDetail, Hotels, Tours</li>
+                <li><strong>Auth:</strong> Login, Register</li>
+                <li><strong>Protected (user):</strong> Dashboard, BookingPage</li>
+                <li><strong>Admin:</strong> AdminDashboard, Bookings, Islands, Hotels, Tours, Rooms, Users, Payments</li>
+            </ul>
+            <p><strong>Layouts &amp; Guards:</strong> <code>Layout</code> and <code>AdminLayout</code> wrap their
+                respective route trees; <code>ProtectedRoute</code> and <code>AdminRoute</code> guard access based on
+                <code>AuthContext</code> state. <strong>UI libraries</strong> in use include
+                <code>react-hook-form</code>, <code>react-hot-toast</code>, <code>lucide-react</code>, and
+                <code>tailwindcss</code>.</p>
+
+            <h2 class="subsection-title">5.3 API Service Layer</h2>
+            <p>All HTTP calls are centralized in <code>services/api.ts</code>, split by domain:</p>
+            <table class="data-table">
+                <thead><tr><th style="width:30%;">Service Module</th><th style="width:70%;">Responsibility</th></tr></thead>
+                <tbody>
+                    <tr><td><code>authAPI</code></td><td>Login, register, get current user, logout</td></tr>
+                    <tr><td><code>islandsAPI</code></td><td>List and fetch island details</td></tr>
+                    <tr><td><code>hotelsAPI</code></td><td>List and fetch hotel details</td></tr>
+                    <tr><td><code>toursAPI</code></td><td>List and fetch tour details</td></tr>
+                    <tr><td><code>bookingsAPI</code></td><td>Create and manage user bookings</td></tr>
+                    <tr><td><code>adminAPI</code></td><td>Admin-only CRUD across catalog, users, dashboard</td></tr>
+                    <tr><td><code>paymentsAPI</code></td><td>Record and retrieve payment transactions</td></tr>
+                    <tr><td><code>reviewsAPI</code></td><td>Submit and fetch hotel/tour reviews</td></tr>
+                </tbody>
+            </table>
+            <p>An <strong>Axios interceptor</strong> injects the Bearer token on every outgoing request, redirects to
+                <code>/login</code> on a <code>401</code> response, and handles CORS headers. Shared shapes live in
+                <code>types/index.ts</code> (<code>User</code>, <code>Hotel</code>, <code>Tour</code>,
+                <code>Booking</code>, <code>Island</code>).</p>
+
+            <h2 class="subsection-title">5.4 Backend Routes</h2>
+            <table class="data-table">
+                <thead><tr><th style="width:30%;">Route Prefix</th><th style="width:70%;">Access Level</th></tr></thead>
+                <tbody>
+                    <tr><td><code>/api/auth</code></td><td>public + protected (mixed)</td></tr>
+                    <tr><td><code>/api/islands</code></td><td>mixed (read public, write admin)</td></tr>
+                    <tr><td><code>/api/hotels</code></td><td>mixed (read public, write admin)</td></tr>
+                    <tr><td><code>/api/tours</code></td><td>mixed (read public, write admin)</td></tr>
+                    <tr><td><code>/api/bookings</code></td><td><span class="badge badge-blue">protect</span></td></tr>
+                    <tr><td><code>/api/payments</code></td><td><span class="badge badge-blue">protect</span></td></tr>
+                    <tr><td><code>/api/reviews</code></td><td>mixed (read public, write protect)</td></tr>
+                    <tr><td><code>/api/admin</code></td><td><span class="badge badge-red">admin only</span></td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="subsection-title">5.5 Controllers</h2>
+            <ul>
+                <li><strong>authController:</strong> <code>login</code>, <code>register</code>, <code>getMe</code>, <code>updateDetails</code>, <code>logout</code></li>
+                <li><strong>bookingController:</strong> <code>getUserBookings</code>, <code>createBooking</code>, <code>updateStatus</code>, <code>getAllBookings</code>, <code>createAdminBooking</code></li>
+                <li><strong>islandController:</strong> <code>getIslands</code>, <code>getIslandById</code>, <code>createIsland</code>, <code>updateIsland</code>, <code>deleteIsland</code></li>
+                <li><strong>adminController:</strong> <code>getDashboard</code>, <code>getUsers</code>, <code>createUser</code>, <code>updateUserStatus</code>, <code>deleteUser</code></li>
+            </ul>
+
+            <h2 class="subsection-title">5.6 Middleware &amp; Configuration</h2>
+            <ul>
+                <li><strong>Auth Middleware:</strong> <code>protect</code> verifies the JWT; <code>authorize('admin')</code> checks the decoded role.</li>
+                <li><strong>JWT Strategy:</strong> HS256 signing, token read from the <code>Authorization</code> header, persisted client-side in <code>localStorage</code>.</li>
+                <li><strong>Validation:</strong> <code>express-validator</code> chains (<code>body</code> / <code>param</code> / <code>query</code>) run before controller logic.</li>
+                <li><strong>Config:</strong> <code>config/database.js</code> exposes the <code>mysql2</code> pool; <code>cors</code>, <code>helmet</code>, and <code>morgan</code> are applied as global middleware.</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section id="section-6">
+            <h1 class="section-title">6. Process View</h1>
+
+            <h2 class="subsection-title">6.1 Authentication Flow</h2>
+            <div class="diagram-container">
+                <svg width="680" height="330" viewBox="0 0 680 330" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="seqarrow" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#1e293b"/>
+</marker>
+</defs>
+<rect x="8" y="10" width="124" height="34" rx="6" fill="#2563eb" />
+<text x="70" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Client (React)</text>
+<line x1="70" y1="44" x2="70" y2="315" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>
+<rect x="278" y="10" width="124" height="34" rx="6" fill="#0f172a" />
+<text x="340" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">API (Express)</text>
+<line x1="340" y1="44" x2="340" y2="315" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>
+<rect x="548" y="10" width="124" height="34" rx="6" fill="#15803d" />
+<text x="610" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">MariaDB</text>
+<line x1="610" y1="44" x2="610" y2="315" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>
+<line x1="70" y1="75.0" x2="340" y2="75.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="100.0" y="58.0" width="210" height="15" fill="#ffffff"/>
+<text x="205.0" y="70.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">1. POST /api/auth/login</text>
+<line x1="340" y1="115.0" x2="610" y2="115.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="370.0" y="98.0" width="210" height="15" fill="#ffffff"/>
+<text x="475.0" y="110.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">2. SELECT * FROM users WHERE email=?</text>
+<line x1="610" y1="155.0" x2="340" y2="155.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="370.0" y="138.0" width="210" height="15" fill="#ffffff"/>
+<text x="475.0" y="150.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">3. Return password hash</text>
+<path d="M 340 187.0 h 46 v 18 h -46" fill="none" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<text x="396" y="198.0" text-anchor="start" font-size="9.6" font-weight="600" fill="#334155">4. bcrypt.compare + sign HS256 JWT</text>
+<line x1="340" y1="235.0" x2="70" y2="235.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="100.0" y="218.0" width="210" height="15" fill="#ffffff"/>
+<text x="205.0" y="230.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">5. 200 OK { token, user }</text>
+<path d="M 70 267.0 h 46 v 18 h -46" fill="none" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<text x="126" y="278.0" text-anchor="start" font-size="9.6" font-weight="600" fill="#334155">6. Store token, set AuthContext</text>
+</svg>
+                <div class="diagram-caption">Figure 6.1 &#8212; Authentication Sequence Diagram</div></div>
+            <ol>
+                <li>User POSTs credentials to <code>/api/auth/login</code>.</li>
+                <li><code>authController</code> queries the <code>users</code> table; <code>bcrypt</code> verifies the password hash.</li>
+                <li>Server signs an HS256 JWT containing <code>user.id</code> and <code>role</code>, and returns it.</li>
+                <li>Client stores the token in <code>localStorage</code> and sets <code>AuthContext</code> state.</li>
+                <li>The Axios interceptor injects <code>Authorization: Bearer &lt;token&gt;</code> on every subsequent request.</li>
+                <li>The <code>protect</code> middleware verifies the token; <code>authorize('admin')</code> checks the role where required.</li>
+            </ol>
+
+            <h2 class="subsection-title">6.2 User Booking Flow</h2>
+            <div class="diagram-container">
+                <svg width="680" height="370" viewBox="0 0 680 370" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="seqarrow" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#1e293b"/>
+</marker>
+</defs>
+<rect x="8" y="10" width="124" height="34" rx="6" fill="#2563eb" />
+<text x="70" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Client (React)</text>
+<line x1="70" y1="44" x2="70" y2="355" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>
+<rect x="278" y="10" width="124" height="34" rx="6" fill="#0f172a" />
+<text x="340" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">API (Express)</text>
+<line x1="340" y1="44" x2="340" y2="355" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>
+<rect x="548" y="10" width="124" height="34" rx="6" fill="#15803d" />
+<text x="610" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">MariaDB</text>
+<line x1="610" y1="44" x2="610" y2="355" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>
+<line x1="70" y1="75.0" x2="340" y2="75.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="100.0" y="58.0" width="210" height="15" fill="#ffffff"/>
+<text x="205.0" y="70.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">1. POST /api/bookings</text>
+<line x1="340" y1="115.0" x2="610" y2="115.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="370.0" y="98.0" width="210" height="15" fill="#ffffff"/>
+<text x="475.0" y="110.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">2. SELECT price_per_night FROM hotels</text>
+<line x1="610" y1="155.0" x2="340" y2="155.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="370.0" y="138.0" width="210" height="15" fill="#ffffff"/>
+<text x="475.0" y="150.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">3. Return authoritative price</text>
+<path d="M 340 187.0 h 46 v 18 h -46" fill="none" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<text x="396" y="198.0" text-anchor="start" font-size="9.6" font-weight="600" fill="#334155">4. Compute total_price server-side</text>
+<line x1="340" y1="235.0" x2="610" y2="235.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="370.0" y="218.0" width="210" height="15" fill="#ffffff"/>
+<text x="475.0" y="230.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">5. INSERT INTO bookings (pending)</text>
+<line x1="340" y1="275.0" x2="70" y2="275.0" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<rect x="100.0" y="258.0" width="210" height="15" fill="#ffffff"/>
+<text x="205.0" y="270.0" text-anchor="middle" font-size="9.6" font-weight="600" fill="#334155">6. 201 Created { booking }</text>
+<path d="M 70 307.0 h 46 v 18 h -46" fill="none" stroke="#1e293b" stroke-width="1.4" marker-end="url(#seqarrow)"/>
+<text x="126" y="318.0" text-anchor="start" font-size="9.6" font-weight="600" fill="#334155">7. Toast success, go to /dashboard</text>
+</svg>
+                <div class="diagram-caption">Figure 6.2 &#8212; Booking Creation Sequence Diagram</div></div>
+            <ol>
+                <li>User navigates to <code>/booking/hotel/:id</code> or <code>/booking/tour/:id</code>.</li>
+                <li><code>BookingPage</code> computes a live total from selected dates × <code>price_per_night</code> (or per-person price for tours).</li>
+                <li>The form submits to <code>bookingsAPI.createBooking()</code>.</li>
+                <li><code>bookingController</code> re-fetches the authoritative hotel/tour price server-side, recomputes the total, and validates the dates.</li>
+                <li>A row is inserted into <code>bookings</code>; <code>status</code> defaults to <code>pending</code>.</li>
+                <li>A toast confirms success and the client redirects to <code>/dashboard</code>.</li>
+            </ol>
+
+            <h2 class="subsection-title">6.3 Admin Booking Creation Flow</h2>
+            <ol>
+                <li>Admin clicks "New Booking"; a slide-in panel opens.</li>
+                <li>The panel fetches users, hotels, and tours in parallel on open.</li>
+                <li>Admin selects a guest, booking type, hotel/tour, and dates; a live price preview updates.</li>
+                <li>A <code>POST</code> is sent to <code>/api/bookings/admin/create</code> with <code>user_id</code> in the body.</li>
+                <li><code>createAdminBooking</code> runs behind the <code>authorize('admin')</code> guard.</li>
+                <li>The row is inserted into <code>bookings</code>; the admin table auto-refreshes via <code>fetchBookings()</code>.</li>
+            </ol>
+
+            <h2 class="subsection-title">6.4 Concurrency Model</h2>
+            <p>
+                The API server runs on Node.js's single-threaded event loop with non-blocking I/O. Database access
+                is pooled through <code>mysql2/promise</code>, allowing multiple concurrent requests to share a
+                bounded set of MariaDB connections without blocking the event loop.
+            </p>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section id="section-7">
+            <h1 class="section-title">7. Deployment View</h1>
+
+            <h2 class="subsection-title">7.1 Physical Network Topology (Local Development)</h2>
+            <div class="diagram-container">
+                <svg width="640" height="220" viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="30" y="30" width="160" height="140" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" />
+                    <text x="110" y="58" text-anchor="middle" font-weight="bold" fill="#1e40af" font-size="12.5">Client Browser</text>
+                    <text x="110" y="82" text-anchor="middle" fill="#475569" font-size="10.5">React Dev Server</text>
+                    <text x="110" y="100" text-anchor="middle" fill="#475569" font-size="10.5">JWT in localStorage</text>
+                    <text x="110" y="130" text-anchor="middle" font-weight="600" fill="#2563eb" font-size="11">localhost:3000</text>
+
+                    <rect x="250" y="30" width="160" height="140" rx="8" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5" />
+                    <text x="330" y="58" text-anchor="middle" font-weight="bold" fill="#0f172a" font-size="12.5">Express API Server</text>
+                    <text x="330" y="82" text-anchor="middle" fill="#475569" font-size="10.5">Node.js runtime</text>
+                    <text x="330" y="100" text-anchor="middle" fill="#475569" font-size="10.5">JWT + bcrypt security</text>
+                    <text x="330" y="130" text-anchor="middle" font-weight="600" fill="#0f172a" font-size="11">localhost:5001</text>
+
+                    <rect x="470" y="30" width="150" height="140" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5" />
+                    <text x="545" y="58" text-anchor="middle" font-weight="bold" fill="#15803d" font-size="12.5">MariaDB (XAMPP)</text>
+                    <text x="545" y="82" text-anchor="middle" fill="#475569" font-size="10.5">v10.4.32</text>
+                    <text x="545" y="100" text-anchor="middle" fill="#475569" font-size="10.5">schema: islan_tour</text>
+                    <text x="545" y="130" text-anchor="middle" font-weight="600" fill="#15803d" font-size="11">localhost:3306</text>
+
+                    <line x1="190" y1="100" x2="250" y2="100" stroke="#2563eb" stroke-width="2" />
+                    <line x1="410" y1="100" x2="470" y2="100" stroke="#16a34a" stroke-width="2" />
+                </svg>
+                <div class="diagram-caption">Figure 7.1 — Local Development Deployment Topology</div>
+            </div>
+
+            <h2 class="subsection-title">7.2 Execution Modes &amp; Environment Requirements</h2>
+            <ul>
+                <li><strong>Development Mode:</strong> The React dev server (<code>npm start</code>, port <code>3000</code>) proxies API calls to the Express server (<code>node server.js</code> / <code>nodemon</code>, port <code>5001</code>).</li>
+                <li><strong>Database Service:</strong> XAMPP's MariaDB service must be running on port <code>3306</code> before the API server starts, since <code>config/database.js</code> establishes the pool at boot.</li>
+                <li><strong>Production Build:</strong> <code>npm run build</code> produces static client assets that can be served by Express or a reverse proxy in front of the API.</li>
+                <li><strong>Runtime Requirements:</strong> Node.js LTS, npm, and XAMPP (Apache + MariaDB) on the host machine.</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 8 -->
+        <section id="section-8">
+            <h1 class="section-title">8. Implementation View</h1>
+
+            <h2 class="subsection-title">8.1 Source Organization</h2>
+            <pre><code>island-rental-system/
+├── client/                            # React 18 + TypeScript SPA
+│   ├── src/
+│   │   ├── pages/                     # Home, Islands, Hotels, Tours, Dashboard, Admin/*
+│   │   ├── components/                # Layout, AdminLayout, route guards, shared UI
+│   │   ├── context/AuthContext.tsx    # Auth session state
+│   │   ├── services/api.ts            # authAPI, islandsAPI, hotelsAPI, toursAPI,
+│   │   │                              #   bookingsAPI, adminAPI, paymentsAPI, reviewsAPI
+│   │   └── types/index.ts             # Shared TypeScript interfaces
+│   └── package.json
+├── server/                            # Express.js REST API (MVC)
+│   ├── routes/                        # auth, islands, hotels, tours, bookings, payments, reviews, admin
+│   ├── controllers/                   # authController, bookingController, islandController, adminController, ...
+│   ├── middleware/                    # protect, authorize('admin'), error handler
+│   ├── config/database.js             # mysql2 connection pool
+│   └── server.js                      # App bootstrap: cors, helmet, morgan, routes
+└── database/
+    └── islan_tour.sql                 # MariaDB DDL schema (users, islands, hotels, rooms, tours, bookings, payments, reviews)</code></pre>
+
+            <h2 class="subsection-title">8.2 Layers</h2>
+            <ol>
+                <li><strong>Presentation Layer (React SPA):</strong> Pages and components under <code>client/src/</code>, styled with Tailwind CSS utility classes, communicating exclusively through <code>services/api.ts</code>.</li>
+                <li><strong>REST Controller &amp; Middleware Layer (Express):</strong> Routes dispatch to controllers; <code>protect</code>/<code>authorize('admin')</code> enforce access before controller logic runs; <code>express-validator</code> validates request bodies.</li>
+                <li><strong>Data Access Layer (mysql2):</strong> Controllers issue parameterized SQL through the shared pool in <code>config/database.js</code>, avoiding SQL injection and ORM overhead.</li>
+            </ol>
+        </section>
+
+        <!-- SECTION 9 -->
+        <section id="section-9">
+            <h1 class="section-title">9. Data View (Storage Model)</h1>
+
+            <h2 class="subsection-title">9.1 Database Schema — Overview</h2>
+            <p>The Island Rental System persists data in eight related MariaDB tables under the
+                <code>islan_tour</code> schema.</p>
+
+            <table class="data-table">
+                <thead><tr><th style="width:20%;">Table</th><th style="width:80%;">Key Columns</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>users</strong></td><td><code>id</code> PK, <code>name</code>, <code>email</code> (UQ), <code>password</code>, <code>phone</code>, <code>role</code> ENUM, <code>status</code> ENUM, <code>created_at</code></td></tr>
+                    <tr><td><strong>islands</strong></td><td><code>id</code> PK, <code>name</code>, <code>description</code>, <code>location</code>, <code>photos</code> JSON, <code>status</code> ENUM, <code>created_at</code></td></tr>
+                    <tr><td><strong>hotels</strong></td><td><code>id</code> PK, <code>island_id</code> FK, <code>name</code>, <code>price_per_night</code>, <code>capacity</code>, <code>amenities</code> JSON, <code>photos</code> JSON, <code>status</code> ENUM</td></tr>
+                    <tr><td><strong>rooms</strong></td><td><code>id</code> PK, <code>hotel_id</code> FK, <code>type</code>, <code>price_per_night</code>, <code>capacity</code>, <code>status</code> ENUM, <code>created_at</code></td></tr>
+                    <tr><td><strong>tours</strong></td><td><code>id</code> PK, <code>island_id</code> FK, <code>name</code>, <code>price</code>, <code>capacity</code>, <code>duration</code>, <code>photos</code> JSON, <code>status</code> ENUM</td></tr>
+                    <tr><td><strong>bookings</strong></td><td><code>id</code> PK, <code>user_id</code> FK, <code>booking_type</code> ENUM, <code>hotel_id</code> FK NULL, <code>tour_id</code> FK NULL, <code>check_in_date</code>, <code>tour_date</code>, <code>number_of_people</code>, <code>total_price</code>, <code>status</code> ENUM</td></tr>
+                    <tr><td><strong>payments</strong></td><td><code>id</code> PK, <code>booking_id</code> FK, <code>user_id</code> FK, <code>amount</code>, <code>payment_method</code> ENUM, <code>status</code> ENUM, <code>created_at</code></td></tr>
+                    <tr><td><strong>reviews</strong></td><td><code>id</code> PK, <code>user_id</code> FK, <code>hotel_id</code> FK NULL, <code>tour_id</code> FK NULL, <code>rating</code> TINYINT, <code>comment</code>, <code>status</code> ENUM</td></tr>
+                </tbody>
+            </table>
+
+            <div class="diagram-container">
+                <svg width="660" height="230" viewBox="0 0 660 230" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="20" width="140" height="70" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
+                    <text x="90" y="40" text-anchor="middle" font-weight="bold" font-size="12" fill="#0f172a">users</text>
+                    <text x="30" y="60" font-family="monospace" font-size="10" fill="#475569">PK id</text>
+                    <text x="30" y="75" font-family="monospace" font-size="10" fill="#475569">role, status</text>
+
+                    <rect x="20" y="130" width="140" height="70" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
+                    <text x="90" y="150" text-anchor="middle" font-weight="bold" font-size="12" fill="#0f172a">islands</text>
+                    <text x="30" y="170" font-family="monospace" font-size="10" fill="#475569">PK id</text>
+                    <text x="30" y="185" font-family="monospace" font-size="10" fill="#475569">location</text>
+
+                    <rect x="255" y="20" width="140" height="70" rx="4" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+                    <text x="325" y="40" text-anchor="middle" font-weight="bold" font-size="12" fill="#1e40af">hotels / tours</text>
+                    <text x="265" y="60" font-family="monospace" font-size="10" fill="#2563eb">FK island_id</text>
+                    <text x="265" y="75" font-family="monospace" font-size="10" fill="#475569">price, capacity</text>
+
+                    <rect x="255" y="130" width="140" height="70" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
+                    <text x="325" y="150" text-anchor="middle" font-weight="bold" font-size="12" fill="#0f172a">rooms</text>
+                    <text x="265" y="170" font-family="monospace" font-size="10" fill="#2563eb">FK hotel_id</text>
+                    <text x="265" y="185" font-family="monospace" font-size="10" fill="#475569">type, capacity</text>
+
+                    <rect x="490" y="20" width="150" height="80" rx="4" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" />
+                    <text x="565" y="40" text-anchor="middle" font-weight="bold" font-size="12" fill="#15803d">bookings</text>
+                    <text x="500" y="60" font-family="monospace" font-size="10" fill="#2563eb">FK user_id</text>
+                    <text x="500" y="73" font-family="monospace" font-size="10" fill="#2563eb">FK hotel_id / tour_id</text>
+                    <text x="500" y="88" font-family="monospace" font-size="10" fill="#475569">status, total_price</text>
+
+                    <rect x="490" y="130" width="150" height="70" rx="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.5" />
+                    <text x="565" y="150" text-anchor="middle" font-weight="bold" font-size="12" fill="#5b21b6">payments</text>
+                    <text x="500" y="170" font-family="monospace" font-size="10" fill="#8b5cf6">FK booking_id</text>
+                    <text x="500" y="185" font-family="monospace" font-size="10" fill="#475569">amount, status</text>
+
+                    <line x1="160" y1="55" x2="255" y2="55" stroke="#2563eb" stroke-width="1.5" />
+                    <line x1="160" y1="165" x2="255" y2="165" stroke="#2563eb" stroke-width="1.5" />
+                    <line x1="395" y1="60" x2="490" y2="60" stroke="#16a34a" stroke-width="1.5" />
+                    <line x1="565" y1="100" x2="565" y2="130" stroke="#8b5cf6" stroke-width="1.5" />
+                </svg>
+                <div class="diagram-caption">Figure 9.1 — Simplified Entity-Relationship Diagram</div>
+            </div>
+
+            <h2 class="subsection-title">9.2 Data Integrity Rules</h2>
+            <div class="callout invariant">
+                <strong>Rule 1 — Server-Computed Price:</strong> <code>total_price</code> is always computed by
+                <code>bookingController</code> from the authoritative <code>price_per_night</code> or tour
+                <code>price</code>, never trusted from client input.
+            </div>
+            <div class="callout invariant">
+                <strong>Rule 2 — Exclusive Booking Target:</strong> A booking references exactly one of
+                <code>hotel_id</code> or <code>tour_id</code> based on <code>booking_type</code>; the other FK
+                column remains <code>NULL</code>.
+            </div>
+            <div class="callout invariant">
+                <strong>Rule 3 — Default Pending Status:</strong> New bookings and payments default to
+                <code>pending</code> status and progress through admin-controlled transitions
+                (e.g. <code>pending → confirmed → completed</code> or <code>cancelled</code>).
+            </div>
+            <div class="callout invariant">
+                <strong>Rule 4 — Referential Integrity:</strong> <code>rooms.hotel_id</code>,
+                <code>hotels.island_id</code>, <code>tours.island_id</code>, and every FK in
+                <code>bookings</code>/<code>payments</code>/<code>reviews</code> reference their parent table with
+                foreign key constraints enforced by MariaDB.
+            </div>
+        </section>
+
+        <!-- SECTION 10 -->
+        <section id="section-10">
+            <h1 class="section-title">10. Size and Performance</h1>
+            <p>The chosen architecture targets responsive local and small-deployment performance for a
+                booking-oriented workload:</p>
+            <ul>
+                <li><strong>Concurrent Users:</strong> Comfortably supports 100–200 concurrent browsing/booking sessions on a single API instance backed by a pooled <code>mysql2</code> connection.</li>
+                <li><strong>Catalog Query Latency:</strong> Average island/hotel/tour listing queries respond in &lt; 50 ms under normal load.</li>
+                <li><strong>Booking Transaction Time:</strong> Booking creation (price computation + insert) completes in &lt; 300 ms end-to-end.</li>
+                <li><strong>Client Bundle:</strong> Production React build stays under ~500 KB gzipped through code-splitting of admin routes.</li>
+            </ul>
+
+            <h2 class="subsection-title">10.1 Key Performance Metrics</h2>
+            <table class="data-table">
+                <thead>
+                    <tr><th style="width:28%;">Metric</th><th style="width:24%;">Target</th><th style="width:48%;">Rationale</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>API Response Latency</strong></td><td>&lt; 50 ms (local)</td><td>Direct parameterized SQL via <code>mysql2</code> pool, no ORM translation overhead.</td></tr>
+                    <tr><td><strong>DB Connection Reuse</strong></td><td>Pool size 10</td><td>Persistent pooled connections avoid per-request TCP/auth handshake cost.</td></tr>
+                    <tr><td><strong>Auth Token Verification</strong></td><td>&lt; 2 ms</td><td>Stateless HS256 JWT verification requires no database round-trip.</td></tr>
+                    <tr><td><strong>Initial Page Load (FCP)</strong></td><td>&lt; 1.5 s</td><td>Vite/CRA production build with route-based code-splitting.</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 11 -->
+        <section id="section-11">
+            <h1 class="section-title">11. Quality</h1>
+
+            <h2 class="subsection-title">11.1 Security</h2>
+            <ul>
+                <li><strong>Password Security:</strong> Passwords are hashed with <code>bcrypt</code> before storage; plain-text passwords are never persisted.</li>
+                <li><strong>Session Authenticity:</strong> HS256 JWTs carry <code>user.id</code> and <code>role</code>; every protected route runs through the <code>protect</code> middleware.</li>
+                <li><strong>SQL Injection Immunity:</strong> All queries use parameterized statements via <code>mysql2</code>.</li>
+                <li><strong>Transport Hardening:</strong> <code>helmet</code> sets protective HTTP headers; <code>cors</code> restricts allowed origins.</li>
+            </ul>
+
+            <h2 class="subsection-title">11.2 Maintainability</h2>
+            <ul>
+                <li><strong>MVC Separation:</strong> Routes, controllers, and middleware are cleanly separated, keeping each file focused on one responsibility.</li>
+                <li><strong>Centralized Validation:</strong> <code>express-validator</code> chains keep input rules declarative and consistent across routes.</li>
+                <li><strong>Type Safety:</strong> Shared TypeScript types keep the client and API contract aligned as the schema evolves.</li>
+            </ul>
+
+            <h2 class="subsection-title">11.3 Reliability</h2>
+            <ul>
+                <li><strong>Connection Pooling:</strong> The <code>mysql2</code> pool automatically recovers dropped connections without restarting the API process.</li>
+                <li><strong>Graceful Auth Failure:</strong> The Axios interceptor redirects to <code>/login</code> on <code>401</code> responses rather than leaving the UI in a broken state.</li>
+                <li><strong>Request Logging:</strong> <code>morgan</code> logs every request, aiding post-incident diagnosis.</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav.sidebar a');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.style.backgroundColor = 'var(--primary-light)';
+                                link.style.color = 'var(--primary)';
+                                link.style.fontWeight = '600';
+                            } else {
+                                link.style.backgroundColor = 'transparent';
+                                link.style.color = 'var(--text)';
+                                link.style.fontWeight = 'normal';
+                            }
+                        });
+                    }
+                });
+            }, { root: null, rootMargin: '0px 0px -60% 0px', threshold: 0 });
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+</body>
+
+</html>
