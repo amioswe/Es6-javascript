@@ -21,3 +21,4 @@ const profile={
 }
 const {name,age,marks:{physics,biology}}=profile;
 console.log(name,age,physics,biology);
+
